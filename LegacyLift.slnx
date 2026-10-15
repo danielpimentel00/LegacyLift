@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="LegacyLift.Domain.Tests/LegacyLift.Domain.Tests.csproj" />
+  <Project Path="LegacyLift.Domain/LegacyLift.Domain.csproj" />
   <Project Path="LegacyLift.IntegrationTests/LegacyLift.IntegrationTests.csproj" />
   <Project Path="LegacyLift/LegacyLift.csproj" />
 </Solution>

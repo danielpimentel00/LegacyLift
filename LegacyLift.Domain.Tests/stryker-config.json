@@ -1,0 +1,11 @@
+{
+  "stryker-config": {
+    "project": "LegacyLift.Domain.csproj",
+    "reporters": [ "html", "json", "progress", "cleartext" ],
+    "thresholds": {
+      "high": 85,
+      "low": 70,
+      "break": 70
+    }
+  }
+}

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using LegacyLift.Domain;
 using RabbitMQ.Client;
 
 public interface IProductEvents
@@ -22,6 +23,7 @@ public class RabbitMqProductEvents(IConfiguration configuration) : IProductEvent
 
         await channel.QueueDeclareAsync(Queue, durable: false, exclusive: false, autoDelete: false);
         await channel.BasicPublishAsync(
-            exchange: "", routingKey: Queue, body: JsonSerializer.SerializeToUtf8Bytes(product));
+            exchange: "", routingKey: Queue, body: JsonSerializer.SerializeToUtf8Bytes(
+                new ProductCreated(product.Id, product.Name, product.Price)));
     }
 }
