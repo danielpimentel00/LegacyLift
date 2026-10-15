@@ -13,6 +13,8 @@ public sealed class Product
     private Product() { }
 
     public int Id { get; private set; }
+    // Stryker disable once String : equivalente. El valor inicial nunca es observable: Create
+    // siempre pasa por Rename y EF Core sobrescribe Name al materializar. Ver docs/semana-6.
     public string Name { get; private set; } = "";
     public decimal Price { get; private set; }
 
@@ -42,6 +44,8 @@ public sealed class Product
 
         var maxChange = Price * MaxPriceChangeRatio;
         if (Math.Abs(newPrice - Price) > maxChange)
+            // Stryker disable once Arithmetic : solo afecta a la redaccion del mensaje, no a la
+            // regla. Los tests no fijan textos a proposito. Ver docs/semana-6.
             throw new DomainException(
                 $"Un cambio de precio no puede superar el {MaxPriceChangeRatio * 100}% del precio actual.");
 
