@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using LegacyLift.Application.Products;
+using LegacyLift.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 using System.Net;

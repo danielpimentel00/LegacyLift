@@ -1,11 +1,12 @@
-﻿using System.Text.Json;
+using System.Text.Json;
+using LegacyLift.Application.Products;
 using LegacyLift.Domain;
 using RabbitMQ.Client;
 
-public interface IProductEvents
-{
-    Task PublishCreatedAsync(Product product);
-}
+namespace LegacyLift.Infrastructure;
+
+// Contrato del mensaje publicado en RabbitMQ (lo que leen los consumidores de la cola).
+public sealed record ProductCreated(int Id, string Name, decimal Price);
 
 public class RabbitMqProductEvents(IConfiguration configuration) : IProductEvents
 {

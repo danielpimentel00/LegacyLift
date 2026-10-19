@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using LegacyLift.Domain;
+using LegacyLift.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 

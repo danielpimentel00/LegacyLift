@@ -12,6 +12,7 @@ using Testcontainers.MsSql;
 using Testcontainers.RabbitMq;
 using Testcontainers.Redis;
 using LegacyLift.Domain;
+using LegacyLift.Infrastructure;
 
 namespace LegacyLift.IntegrationTests;
 
