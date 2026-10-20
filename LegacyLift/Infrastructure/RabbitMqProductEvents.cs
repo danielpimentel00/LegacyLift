@@ -1,10 +1,12 @@
-﻿using System.Text.Json;
+using System.Text.Json;
+using LegacyLift.Application.Products;
+using LegacyLift.Domain;
 using RabbitMQ.Client;
 
-public interface IProductEvents
-{
-    Task PublishCreatedAsync(Product product);
-}
+namespace LegacyLift.Infrastructure;
+
+// Contrato del mensaje publicado en RabbitMQ (lo que leen los consumidores de la cola).
+public sealed record ProductCreated(int Id, string Name, decimal Price);
 
 public class RabbitMqProductEvents(IConfiguration configuration) : IProductEvents
 {
@@ -22,6 +24,7 @@ public class RabbitMqProductEvents(IConfiguration configuration) : IProductEvent
 
         await channel.QueueDeclareAsync(Queue, durable: false, exclusive: false, autoDelete: false);
         await channel.BasicPublishAsync(
-            exchange: "", routingKey: Queue, body: JsonSerializer.SerializeToUtf8Bytes(product));
+            exchange: "", routingKey: Queue, body: JsonSerializer.SerializeToUtf8Bytes(
+                new ProductCreated(product.Id, product.Name, product.Price)));
     }
 }

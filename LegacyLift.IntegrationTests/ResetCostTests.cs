@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics;
+using LegacyLift.Domain;
+using LegacyLift.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 
@@ -51,7 +53,7 @@ public class ResetCostTests(ContainersWebApplicationFactory factory, ITestOutput
     {
         using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        db.Products.Add(new Product { Name = "Temporal", Price = 1m });
+        db.Products.Add(Product.Create("Temporal", 1m));
         await db.SaveChangesAsync();
     }
 

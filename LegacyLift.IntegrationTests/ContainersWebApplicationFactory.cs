@@ -11,6 +11,8 @@ using Respawn;
 using Testcontainers.MsSql;
 using Testcontainers.RabbitMq;
 using Testcontainers.Redis;
+using LegacyLift.Domain;
+using LegacyLift.Infrastructure;
 
 namespace LegacyLift.IntegrationTests;
 
@@ -123,9 +125,12 @@ public class ContainersWebApplicationFactory : WebApplicationFactory<Program>, I
         await db.Products.ExecuteDeleteAsync();
         await db.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Products ON");
 
-        db.Products.AddRange(
-            new Product { Id = 1, Name = "Teclado", Price = 49.99m },
-            new Product { Id = 2, Name = "Monitor", Price = 199.00m });
+        // Id tiene setter privado: el Id explicito se asigna a traves del change tracker.
+        var teclado = Product.Create("Teclado", 49.99m);
+        var monitor = Product.Create("Monitor", 199.00m);
+        db.Products.AddRange(teclado, monitor);
+        db.Entry(teclado).Property(p => p.Id).CurrentValue = 1;
+        db.Entry(monitor).Property(p => p.Id).CurrentValue = 2;
         await db.SaveChangesAsync();
 
         await db.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Products OFF");
@@ -146,9 +151,9 @@ public class ContainersWebApplicationFactory : WebApplicationFactory<Program>, I
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         // Uno a uno, para que el orden de los Ids generados sea determinista.
-        db.Products.Add(new Product { Name = "Teclado", Price = 49.99m });
+        db.Products.Add(Product.Create("Teclado", 49.99m));
         await db.SaveChangesAsync();
-        db.Products.Add(new Product { Name = "Monitor", Price = 199.00m });
+        db.Products.Add(Product.Create("Monitor", 199.00m));
         await db.SaveChangesAsync();
     }
 

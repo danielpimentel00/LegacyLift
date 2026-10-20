@@ -12,4 +12,8 @@
     <PackageReference Include="RabbitMQ.Client" Version="7.2.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LegacyLift.Domain\LegacyLift.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

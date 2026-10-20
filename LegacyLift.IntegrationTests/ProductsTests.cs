@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using LegacyLift.Application.Products;
+using LegacyLift.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 using System.Net;
@@ -20,7 +22,7 @@ public abstract class ProductsTests(ContainersWebApplicationFactory factory) : I
     [Fact]
     public async Task GetProduct_ReturnsSeededProduct()
     {
-        var product = await _client.GetFromJsonAsync<Product>("/api/products/1");
+        var product = await _client.GetFromJsonAsync<ProductResponse>("/api/products/1");
 
         Assert.Equal("Teclado", product!.Name);
     }
@@ -45,7 +47,7 @@ public abstract class ProductsTests(ContainersWebApplicationFactory factory) : I
                 .ExecuteUpdateAsync(s => s.SetProperty(p => p.Name, "Cambiado"));
         }
 
-        var product = await _client.GetFromJsonAsync<Product>("/api/products/1");
+        var product = await _client.GetFromJsonAsync<ProductResponse>("/api/products/1");
 
         // La base dice "Cambiado"; si llega "Teclado", la respuesta salio de Redis.
         Assert.Equal("Teclado", product!.Name);
@@ -78,7 +80,7 @@ public abstract class ProductsTests(ContainersWebApplicationFactory factory) : I
         var message = await channel.BasicGetAsync(RabbitMqProductEvents.Queue, autoAck: true);
 
         Assert.NotNull(message);
-        var published = JsonSerializer.Deserialize<Product>(message.Body.Span);
+        var published = JsonSerializer.Deserialize<ProductCreated>(message.Body.Span);
         Assert.Equal("Ratón", published!.Name);
     }
 }
