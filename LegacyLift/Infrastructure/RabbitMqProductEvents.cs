@@ -22,7 +22,9 @@ public class RabbitMqProductEvents(IConfiguration configuration) : IProductEvent
         await using var connection = await factory.CreateConnectionAsync();
         await using var channel = await connection.CreateChannelAsync();
 
-        await channel.QueueDeclareAsync(Queue, durable: false, exclusive: false, autoDelete: false);
+        // durable: true. RabbitMQ 4 ya no permite colas transitorias no exclusivas
+        // (feature flag transient_nonexcl_queues).
+        await channel.QueueDeclareAsync(Queue, durable: true, exclusive: false, autoDelete: false);
         await channel.BasicPublishAsync(
             exchange: "", routingKey: Queue, body: JsonSerializer.SerializeToUtf8Bytes(
                 new ProductCreated(product.Id, product.Name, product.Price)));

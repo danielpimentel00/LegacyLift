@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- AppDbContext y las migraciones viven en el proyecto de la API (capa Infrastructure).
+         Si Infrastructure se separa en su propio ensamblado, esta referencia apuntaria ahi. -->
+    <ProjectReference Include="..\LegacyLift\LegacyLift.csproj" />
+    <ProjectReference Include="..\LegacyLift.ServiceDefaults\LegacyLift.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+</Project>
