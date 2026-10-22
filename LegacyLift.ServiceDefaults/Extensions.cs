@@ -1,20 +1,22 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace Microsoft.Extensions.Hosting;
 
-// Configuracion transversal que comparten todos los servicios de LegacyLift: telemetria,
-// health checks, service discovery y resiliencia de HttpClient. Solo esto: nada de modelos aqui.
 public static class Extensions
 {
     private const string HealthEndpointPath = "/health";
     private const string AlivenessEndpointPath = "/alive";
+    private const string LegacyLiftTelemetryPrefix = "LegacyLift*";
 
     public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
@@ -23,9 +25,19 @@ public static class Extensions
 
         builder.Services.AddServiceDiscovery();
 
+        var resilience = builder.Configuration.GetSection("HttpResilience");
+
         builder.Services.ConfigureHttpClientDefaults(http =>
         {
-            http.AddStandardResilienceHandler();
+            if (resilience.Exists())
+            {
+                http.AddStandardResilienceHandler(resilience);
+            }
+            else
+            {
+                http.AddStandardResilienceHandler();
+            }
+
             http.AddServiceDiscovery();
         });
 
@@ -41,17 +53,21 @@ public static class Extensions
         });
 
         builder.Services.AddOpenTelemetry()
+            .ConfigureResource(resource => resource.AddAttributes(
+            [
+                new("deployment.environment.name", builder.Environment.EnvironmentName)
+            ]))
             .WithMetrics(metrics =>
             {
-                metrics.AddAspNetCoreInstrumentation()
+                metrics.AddMeter(LegacyLiftTelemetryPrefix)
+                    .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation();
             })
             .WithTracing(tracing =>
             {
-                tracing.AddSource(builder.Environment.ApplicationName)
+                tracing.AddSource(LegacyLiftTelemetryPrefix)
                     .AddAspNetCoreInstrumentation(options =>
-                        // Las sondas de salud no aportan nada en las trazas.
                         options.Filter = context =>
                             !context.Request.Path.StartsWithSegments(HealthEndpointPath)
                             && !context.Request.Path.StartsWithSegments(AlivenessEndpointPath))
@@ -65,8 +81,6 @@ public static class Extensions
 
     private static TBuilder AddOpenTelemetryExporters<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
-        // Aspire inyecta esta variable apuntando al dashboard. Fuera de Aspire (tests, produccion
-        // sin configurar) no existe y no se exporta nada.
         var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
 
         if (useOtlpExporter)
@@ -90,7 +104,10 @@ public static class Extensions
         // Solo en Development: exponer health checks en produccion tiene implicaciones de seguridad.
         if (app.Environment.IsDevelopment())
         {
-            app.MapHealthChecks(HealthEndpointPath);
+            app.MapHealthChecks(HealthEndpointPath, new HealthCheckOptions
+            {
+                ResponseWriter = WriteHealthReportAsync
+            });
 
             app.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
             {
@@ -100,4 +117,18 @@ public static class Extensions
 
         return app;
     }
+
+    private static Task WriteHealthReportAsync(HttpContext context, HealthReport report) =>
+        context.Response.WriteAsJsonAsync(new
+        {
+            status = report.Status.ToString(),
+            durationMs = report.TotalDuration.TotalMilliseconds,
+            checks = report.Entries.Select(entry => new
+            {
+                name = entry.Key,
+                status = entry.Value.Status.ToString(),
+                durationMs = entry.Value.Duration.TotalMilliseconds,
+                error = entry.Value.Exception?.Message
+            })
+        });
 }
