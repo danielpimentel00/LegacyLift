@@ -8,22 +8,15 @@ namespace LegacyLift.Infrastructure;
 // Contrato del mensaje publicado en RabbitMQ (lo que leen los consumidores de la cola).
 public sealed record ProductCreated(int Id, string Name, decimal Price);
 
-public class RabbitMqProductEvents(IConfiguration configuration) : IProductEvents
+public class RabbitMqProductEvents(IConnection connection) : IProductEvents
 {
     public const string Queue = "product-created";
 
     public async Task PublishCreatedAsync(Product product)
     {
-        var factory = new ConnectionFactory
-        {
-            Uri = new Uri(configuration.GetConnectionString("RabbitMq")!)
-        };
-
-        await using var connection = await factory.CreateConnectionAsync();
         await using var channel = await connection.CreateChannelAsync();
 
-        // durable: true. RabbitMQ 4 ya no permite colas transitorias no exclusivas
-        // (feature flag transient_nonexcl_queues).
+        // durable: RabbitMQ 4 no permite colas transitorias no exclusivas.
         await channel.QueueDeclareAsync(Queue, durable: true, exclusive: false, autoDelete: false);
         await channel.BasicPublishAsync(
             exchange: "", routingKey: Queue, body: JsonSerializer.SerializeToUtf8Bytes(

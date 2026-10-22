@@ -5,19 +5,20 @@ namespace LegacyLift.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IHostApplicationBuilder AddInfrastructure(this IHostApplicationBuilder builder)
     {
-        // Las lambdas leen la configuración al construir las opciones, no ahora: así los tests de
-        // integración pueden sobrescribir las cadenas de conexión con UseSetting.
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("Default")));
+        // Registro propio + Enrich (y no AddSqlServerDbContext): los tests de integracion
+        // reemplazan las opciones del DbContext y AddSqlServerDbContext usa pooling.
+        builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+        builder.EnrichSqlServerDbContext<AppDbContext>();
 
-        services.AddStackExchangeRedisCache(options =>
-            options.Configuration = configuration.GetConnectionString("Redis"));
+        builder.AddRedisDistributedCache("Redis");
+        builder.AddRabbitMQClient("RabbitMq");
 
-        services.AddScoped<IProductRepository, EfProductRepository>();
-        services.AddSingleton<IProductEvents, RabbitMqProductEvents>();
+        builder.Services.AddScoped<IProductRepository, EfProductRepository>();
+        builder.Services.AddSingleton<IProductEvents, RabbitMqProductEvents>();
 
-        return services;
+        return builder;
     }
 }

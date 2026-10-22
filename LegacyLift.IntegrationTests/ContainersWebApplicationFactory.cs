@@ -57,6 +57,11 @@ public class ContainersWebApplicationFactory : WebApplicationFactory<Program>, I
         _connection = new SqlConnection(sql.ConnectionString);
         await _connection.OpenAsync();
 
+        // Variables de entorno y no UseSetting: las integraciones de Aspire leen la cadena de
+        // conexion al registrarse, antes de que se apliquen los UseSetting de la factory.
+        Environment.SetEnvironmentVariable("ConnectionStrings__Redis", _redis.GetConnectionString());
+        Environment.SetEnvironmentVariable("ConnectionStrings__RabbitMq", _rabbit.GetConnectionString());
+
         // Acceder a Services construye el host; los contenedores ya tienen puerto asignado.
         _ = Services;
 
@@ -69,9 +74,6 @@ public class ContainersWebApplicationFactory : WebApplicationFactory<Program>, I
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseSetting("ConnectionStrings:Redis", _redis.GetConnectionString());
-        builder.UseSetting("ConnectionStrings:RabbitMq", _rabbit.GetConnectionString());
-
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll<DbContextOptions<AppDbContext>>();
