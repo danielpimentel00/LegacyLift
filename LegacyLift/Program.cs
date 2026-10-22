@@ -4,8 +4,10 @@ using LegacyLift.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.AddInfrastructure();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<DomainExceptionHandler>();
@@ -13,6 +15,7 @@ builder.Services.AddExceptionHandler<DomainExceptionHandler>();
 var app = builder.Build();
 
 app.UseExceptionHandler();
+app.MapDefaultEndpoints();
 app.MapProductEndpoints();
 
 app.Run();

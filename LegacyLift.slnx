@@ -1,7 +1,15 @@
 <Solution>
-  <Project Path="LegacyLift.ArchitectureTests/LegacyLift.ArchitectureTests.csproj" />
-  <Project Path="LegacyLift.Domain.Tests/LegacyLift.Domain.Tests.csproj" />
-  <Project Path="LegacyLift.Domain/LegacyLift.Domain.csproj" />
-  <Project Path="LegacyLift.IntegrationTests/LegacyLift.IntegrationTests.csproj" />
-  <Project Path="LegacyLift/LegacyLift.csproj" />
+  <Folder Name="/src/">
+    <Project Path="LegacyLift.AppHost/LegacyLift.AppHost.csproj" />
+    <Project Path="LegacyLift.Domain/LegacyLift.Domain.csproj" />
+    <Project Path="LegacyLift.MigrationService/LegacyLift.MigrationService.csproj" />
+    <Project Path="LegacyLift.ServiceDefaults/LegacyLift.ServiceDefaults.csproj" />
+    <Project Path="LegacyLift.Worker/LegacyLift.Worker.csproj" />
+    <Project Path="LegacyLift/LegacyLift.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="LegacyLift.ArchitectureTests/LegacyLift.ArchitectureTests.csproj" />
+    <Project Path="LegacyLift.Domain.Tests/LegacyLift.Domain.Tests.csproj" />
+    <Project Path="LegacyLift.IntegrationTests/LegacyLift.IntegrationTests.csproj" />
+  </Folder>
 </Solution>

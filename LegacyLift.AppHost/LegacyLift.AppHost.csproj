@@ -1,0 +1,25 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.6.0">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- Aspire guarda aqui las contrasenas que genera (SQL Server, RabbitMQ), para que sean
+         las mismas en cada ejecucion y coincidan con los datos del volumen. -->
+    <UserSecretsId>5b0d3c1e-8f47-4b5a-9a63-2f7e1c9d4a18</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LegacyLift\LegacyLift.csproj" />
+    <ProjectReference Include="..\LegacyLift.MigrationService\LegacyLift.MigrationService.csproj" />
+    <ProjectReference Include="..\LegacyLift.Worker\LegacyLift.Worker.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.6.0" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="13.6.0" />
+    <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.6.0" />
+  </ItemGroup>
+
+</Project>
