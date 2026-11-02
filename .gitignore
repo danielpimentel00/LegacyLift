@@ -58,3 +58,6 @@ nunit-*.xml
 .vs/
 # Stryker.NET
 StrykerOutput/
+
+*.csproj.user
+*PublishProfiles/

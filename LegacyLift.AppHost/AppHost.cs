@@ -27,10 +27,11 @@ var migrations = builder.AddProject<Projects.LegacyLift_MigrationService>("migra
 // (ConnectionStrings__Default, ...): coincide con lo que ya leen la API y el worker,
 // asi su codigo no cambia.
 builder.AddProject<Projects.LegacyLift>("api")
+    .WithExternalHttpEndpoints()
     .WithReference(db, "Default")
     .WithReference(redis, "Redis")
     .WithReference(rabbitmq, "RabbitMq")
-    .WaitForCompletion(migrations) // implica que db ya estaba lista
+    .WaitForCompletion(migrations)
     .WaitFor(redis)
     .WaitFor(rabbitmq);
 
