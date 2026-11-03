@@ -11,6 +11,10 @@ public static class DependencyInjection
         services.AddScoped<GetProductHandler>();
         services.AddScoped<GetProductQuoteHandler>();
         services.AddScoped<CreateProductHandler>();
+
+        services.AddOptions<ProductCacheOptions>()
+            .BindConfiguration(ProductCacheOptions.Section);
+
         return services;
     }
 }

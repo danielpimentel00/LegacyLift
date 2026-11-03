@@ -6,6 +6,21 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
+var useAppConfig = builder.Configuration.GetConnectionString("config") is not null;
+if (useAppConfig)
+{
+    builder.AddAzureAppConfiguration("config", configureOptions: options =>
+        options.ConfigureRefresh(refresh => refresh
+            .Register("Sentinel", refreshAll: true)
+            .SetRefreshInterval(TimeSpan.FromSeconds(30))));
+    builder.Services.AddAzureAppConfiguration();
+}
+
+if (builder.Configuration.GetConnectionString("secrets") is not null)
+{
+    builder.Configuration.AddAzureKeyVaultSecrets("secrets");
+}
+
 builder.Services.AddApplication();
 builder.AddInfrastructure();
 
@@ -13,6 +28,11 @@ builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<DomainExceptionHandler>();
 
 var app = builder.Build();
+
+if (useAppConfig)
+{
+    app.UseAzureAppConfiguration();
+}
 
 app.UseExceptionHandler();
 app.MapDefaultEndpoints();

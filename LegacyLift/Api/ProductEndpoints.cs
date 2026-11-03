@@ -27,6 +27,16 @@ internal static class ProductEndpoints
         {
             var product = await handler.HandleAsync(request.Name, request.Price, cancellationToken);
             return Results.Created($"/api/products/{product.Id}", product);
+        })
+        .AddEndpointFilter(async (context, next) =>
+        {
+            var config = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
+            var expected = config["Api:AdminKey"];
+            var provided = context.HttpContext.Request.Headers["X-Api-Key"].ToString();
+
+            return string.IsNullOrEmpty(expected) || provided == expected
+                ? await next(context)
+                : Results.Unauthorized();
         });
 
         return app;
