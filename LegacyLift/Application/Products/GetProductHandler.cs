@@ -1,11 +1,15 @@
-using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 namespace LegacyLift.Application.Products;
 
 // IDistributedCache es una abstracción (Microsoft.Extensions.Caching.Abstractions), no Redis:
 // Application puede usarla sin depender de la infraestructura concreta.
-internal sealed class GetProductHandler(IProductRepository products, IDistributedCache cache)
+internal sealed class GetProductHandler(
+    IProductRepository products,
+    IDistributedCache cache,
+    IOptionsMonitor<ProductCacheOptions> cacheOptions)
 {
     public async Task<ProductResponse?> HandleAsync(int id, CancellationToken cancellationToken)
     {
@@ -20,7 +24,12 @@ internal sealed class GetProductHandler(IProductRepository products, IDistribute
             return null;
 
         var response = ProductResponse.From(product);
-        await cache.SetStringAsync(key, JsonSerializer.Serialize(response), cancellationToken);
+        await cache.SetStringAsync(key, JsonSerializer.Serialize(response),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(cacheOptions.CurrentValue.TtlSeconds)
+            },
+            cancellationToken);
         return response;
     }
 }

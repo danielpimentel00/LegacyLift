@@ -26,13 +26,22 @@ var migrations = builder.AddProject<Projects.LegacyLift_MigrationService>("migra
 // El segundo argumento de WithReference es el nombre de la cadena de conexion que se inyecta
 // (ConnectionStrings__Default, ...): coincide con lo que ya leen la API y el worker,
 // asi su codigo no cambia.
+var config = builder.AddAzureAppConfiguration("config")
+    .RunAsEmulator();
+
+var secrets = builder.AddAzureKeyVault("secrets");
+
 builder.AddProject<Projects.LegacyLift>("api")
+    .WithExternalHttpEndpoints()
     .WithReference(db, "Default")
     .WithReference(redis, "Redis")
     .WithReference(rabbitmq, "RabbitMq")
-    .WaitForCompletion(migrations) // implica que db ya estaba lista
+    .WithReference(config)
+    .WithReference(secrets)
+    .WaitForCompletion(migrations)
     .WaitFor(redis)
-    .WaitFor(rabbitmq);
+    .WaitFor(rabbitmq)
+    .WaitFor(config);
 
 builder.AddProject<Projects.LegacyLift_Worker>("worker")
     .WithReference(rabbitmq, "RabbitMq")

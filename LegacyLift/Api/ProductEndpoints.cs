@@ -1,4 +1,5 @@
 using LegacyLift.Application.Products;
+using Microsoft.FeatureManagement;
 
 namespace LegacyLift.Api;
 
@@ -20,6 +21,13 @@ internal static class ProductEndpoints
         {
             var quote = await handler.HandleAsync(id, quantity, cancellationToken);
             return quote is null ? Results.NotFound() : Results.Ok(quote);
+        })
+        .AddEndpointFilter(async (context, next) =>
+        {
+            var features = context.HttpContext.RequestServices.GetRequiredService<IFeatureManager>();
+            return await features.IsEnabledAsync(FeatureFlags.ProductQuote)
+                ? await next(context)
+                : Results.NotFound();
         });
 
         app.MapPost("/api/products", async (
@@ -27,6 +35,16 @@ internal static class ProductEndpoints
         {
             var product = await handler.HandleAsync(request.Name, request.Price, cancellationToken);
             return Results.Created($"/api/products/{product.Id}", product);
+        })
+        .AddEndpointFilter(async (context, next) =>
+        {
+            var config = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
+            var expected = config["Api:AdminKey"];
+            var provided = context.HttpContext.Request.Headers["X-Api-Key"].ToString();
+
+            return string.IsNullOrEmpty(expected) || provided == expected
+                ? await next(context)
+                : Results.Unauthorized();
         });
 
         return app;
