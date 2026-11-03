@@ -10,6 +10,7 @@
     <PackageReference Include="Aspire.Azure.Security.KeyVault" Version="13.6.0" />
     <PackageReference Include="Aspire.Microsoft.Extensions.Configuration.AzureAppConfiguration" Version="13.6.0" />
     <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.6.1" />
+    <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="4.8.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
