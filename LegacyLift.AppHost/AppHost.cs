@@ -47,4 +47,13 @@ builder.AddProject<Projects.LegacyLift_Worker>("worker")
     .WithReference(rabbitmq, "RabbitMq")
     .WaitFor(rabbitmq);
 
+// Functions necesita una cuenta de Storage para el host (AzureWebJobsStorage): locks de los
+// timers, claves y, mas adelante, el estado de Durable Functions. En local corre Azurite.
+var storage = builder.AddAzureStorage("storage")
+    .RunAsEmulator();
+
+builder.AddAzureFunctionsProject<Projects.LegacyLift_Functions>("functions")
+    .WithHostStorage(storage)
+    .WithExternalHttpEndpoints();
+
 builder.Build().Run();
