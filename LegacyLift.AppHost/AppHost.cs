@@ -52,8 +52,20 @@ builder.AddProject<Projects.LegacyLift_Worker>("worker")
 var storage = builder.AddAzureStorage("storage")
     .RunAsEmulator();
 
+var blobs = storage.AddBlobs("blobs");
+
+// El emulador de Service Bus solo conoce las colas declaradas aqui (no se crean al vuelo).
+var serviceBus = builder.AddAzureServiceBus("servicebus")
+    .RunAsEmulator();
+
+serviceBus.AddServiceBusQueue("product-imports");
+
+// El nombre de cada recurso referenciado es el valor de Connection en los triggers.
 builder.AddAzureFunctionsProject<Projects.LegacyLift_Functions>("functions")
     .WithHostStorage(storage)
+    .WithReference(blobs)
+    .WithReference(serviceBus)
+    .WaitFor(serviceBus)
     .WithExternalHttpEndpoints();
 
 builder.Build().Run();
