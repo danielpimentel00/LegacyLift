@@ -12,13 +12,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LegacyLift\LegacyLift.csproj" />
+    <ProjectReference Include="..\LegacyLift.Functions\LegacyLift.Functions.csproj" />
     <ProjectReference Include="..\LegacyLift.MigrationService\LegacyLift.MigrationService.csproj" />
     <ProjectReference Include="..\LegacyLift.Worker\LegacyLift.Worker.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.Azure.AppConfiguration" Version="13.6.0" />
+    <PackageReference Include="Aspire.Hosting.Azure.Functions" Version="13.6.0" />
     <PackageReference Include="Aspire.Hosting.Azure.KeyVault" Version="13.6.0" />
+    <PackageReference Include="Aspire.Hosting.Azure.ServiceBus" Version="13.6.0" />
+    <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="13.6.0" />
     <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.6.0" />
     <PackageReference Include="Aspire.Hosting.Redis" Version="13.6.0" />
     <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.6.0" />

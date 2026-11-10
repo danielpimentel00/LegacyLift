@@ -47,4 +47,25 @@ builder.AddProject<Projects.LegacyLift_Worker>("worker")
     .WithReference(rabbitmq, "RabbitMq")
     .WaitFor(rabbitmq);
 
+// Functions necesita una cuenta de Storage para el host (AzureWebJobsStorage): locks de los
+// timers, claves y, mas adelante, el estado de Durable Functions. En local corre Azurite.
+var storage = builder.AddAzureStorage("storage")
+    .RunAsEmulator();
+
+var blobs = storage.AddBlobs("blobs");
+
+// El emulador de Service Bus solo conoce las colas declaradas aqui (no se crean al vuelo).
+var serviceBus = builder.AddAzureServiceBus("servicebus")
+    .RunAsEmulator();
+
+serviceBus.AddServiceBusQueue("product-imports");
+
+// El nombre de cada recurso referenciado es el valor de Connection en los triggers.
+builder.AddAzureFunctionsProject<Projects.LegacyLift_Functions>("functions")
+    .WithHostStorage(storage)
+    .WithReference(blobs)
+    .WithReference(serviceBus)
+    .WaitFor(serviceBus)
+    .WithExternalHttpEndpoints();
+
 builder.Build().Run();

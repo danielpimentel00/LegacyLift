@@ -1,0 +1,14 @@
+{
+  "version": "2.0",
+  "telemetryMode": "OpenTelemetry",
+  "extensions": {
+    "durableTask": {
+      "hubName": "LegacyLift"
+    }
+  },
+  "logging": {
+    "logLevel": {
+      "default": "Information"
+    }
+  }
+}
